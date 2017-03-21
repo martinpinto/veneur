@@ -10,6 +10,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -274,6 +275,14 @@ func (s *Server) reportGlobalMetricsFlushCounts(ms metricsSummary) {
 // flushRemote breaks up the final metrics into chunks
 // (to avoid hitting the size cap) and POSTs them to the remote API
 func (s *Server) flushRemote(finalMetrics []samplers.DDMetric) {
+
+	mem := new(runtime.MemStats)
+	runtime.ReadMemStats(mem)
+
+	s.statsd.Gauge("mem.heap_alloc_bytes", float64(mem.HeapAlloc), nil, 1.0)
+	s.statsd.Gauge("gc.number", float64(mem.NumGC), nil, 1.0)
+	s.statsd.Gauge("gc.pause_total_ns", float64(mem.PauseTotalNs), nil, 1.0)
+
 	s.statsd.Gauge("flush.post_metrics_total", float64(len(finalMetrics)), nil, 1.0)
 	// Check to see if we have anything to do
 	if len(finalMetrics) == 0 {
