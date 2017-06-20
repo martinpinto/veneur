@@ -472,6 +472,8 @@ func (s *Server) flushTraces(ctx context.Context) {
 	span, _ := trace.StartSpanFromContext(ctx, "")
 	defer span.Finish()
 
+	tags := s.traceTags(span.Attach(ctx))
+
 	traceRing := s.TraceWorker.Flush()
 
 	ssfSpans := make([]ssf.SSFSpan, 0, traceRing.Len())
@@ -482,6 +484,11 @@ func (s *Server) flushTraces(ctx context.Context) {
 			if !ok {
 				log.Error("Got an unknown object in tracing ring!")
 				return
+			}
+
+			// this will overwrite tags already present on the span
+			for _, tag := range tags {
+				ssfSpan.Tags[tag[0]] = tag[1]
 			}
 			ssfSpans = append(ssfSpans, ssfSpan)
 		}
@@ -661,6 +668,19 @@ func postHelper(ctx context.Context, httpClient *http.Client, stats *statsd.Clie
 	stats.Count(action+".error_total", 0, nil, 1.0)
 	resultLogger.Debug("POSTed successfully")
 	return nil
+}
+
+func (s *Server) traceTags(ctx context.Context) [][2]string {
+	tags := make([][2]string, len(s.Tags))
+	for i, tag := range s.Tags {
+		splt := strings.SplitN(tag, ":", 2)
+		if len(splt) < 2 {
+			tags[i] = [2]string{tag, ""}
+			continue
+		}
+		tags[i] = [2]string{splt[0], splt[1]}
+	}
+	return tags
 }
 
 // TODO better name, also finalize type signature
