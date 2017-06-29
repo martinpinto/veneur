@@ -1,3 +1,9 @@
+# 1.4.1, PENDING
+
+## Improvements
+
+* It is no longer required to emit a `sum` to get an `avg` when configuring what aggregations to emit for a histogram. Thanks [cgilling](https://github.com/cgilling)!
+
 # 1.4.0, 2017-06-09
 
 ## Changes
