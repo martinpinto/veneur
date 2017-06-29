@@ -1,3 +1,8 @@
+# 1.4.1, PENDING
+
+## Added
+* Config options can now be provided via environment variables using [envconfig](https://github.com/kelseyhightower/envconfig) for veneur and veneur-proxy
+
 # 1.4.0, 2017-06-09
 
 ## Changes
