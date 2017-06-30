@@ -565,7 +565,6 @@ func (s *Server) HandleMetricPacket(packet []byte) error {
 			s.Statsd.Count("packet.error_total", 1, []string{"packet_type:metric", "reason:parse"}, 1.0)
 			return err
 		}
-		fmt.Println(*metric)
 		s.Workers[metric.Digest%uint32(len(s.Workers))].PacketChan <- *metric
 	}
 	return nil
@@ -592,8 +591,6 @@ func (s *Server) HandleTracePacket(packet []byte) {
 		log.WithError(err).Warn("Trace unmarshaling error")
 		return
 	}
-	// fmt.Println(*newSample)
-	// fmt.Println(newSample.Metrics)
 	for _, metricPacket := range newSample.Metrics {
 		metric, err := samplers.ParseMetricSSF(metricPacket)
 		if err != nil {
